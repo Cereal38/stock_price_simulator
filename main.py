@@ -7,7 +7,7 @@ from utils.indicators import movingAverage
 from utils.candle import Candle
 from utils.history import History
 
-DURATION = 1 * 24 * 60 # In minutes
+DURATION = 365 * 24 * 60 # In minutes
 INIT_PRICE = 100
 rules = [{
     "condition": lambda history: history.candles[-1].close > INIT_PRICE,
@@ -52,7 +52,7 @@ def main():
         DURATION,
         rules
     )
-    history.display()
+    history.display("d")
 
 if __name__ == '__main__':
     main()

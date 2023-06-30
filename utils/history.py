@@ -16,18 +16,20 @@ class History:
         self.length += 1
 
 
-    def display(self):
+    def display(self, unit: str = "m"):
+        
+        # Convert the history to the asked unit
+        convertedHistory = self.convert(unit)
 
         # Plot candles as a candlestick chart
-        # Add indicators
         df = pd.DataFrame({
-            "Open": [candle.open for candle in self.candles],
-            "Close": [candle.close for candle in self.candles],
-            "High": [candle.high for candle in self.candles],
-            "Low": [candle.low for candle in self.candles],
-            "Volume": [candle.volume for candle in self.candles],
+            "Open": [candle.open for candle in convertedHistory],
+            "Close": [candle.close for candle in convertedHistory],
+            "High": [candle.high for candle in convertedHistory],
+            "Low": [candle.low for candle in convertedHistory],
+            "Volume": [candle.volume for candle in convertedHistory]
         })
-        df.index = pd.to_datetime(df.index, unit='m')
+        df.index = pd.to_datetime(df.index, unit="m")
         df = df.iloc[::-1]
         mpf.plot(df, type='candle', style='charles', volume=True, warn_too_much_data=20000)
             
@@ -61,3 +63,48 @@ class History:
             for rule in rules:
                 if rule["condition"](self):
                     rule["action"](self)
+    
+    def convert(self, unit: str = "h"):
+        """
+        Convert the history from minutes to the asked unit and return new candles list
+        Possible units: "m", "h", "d", "w"
+        """
+
+        newCandles = []
+
+        if unit == "m":
+            return self.candles
+        
+        elif unit == "h":
+            for i in range(0, self.length, 60):
+                newCandles.append(Candle(
+                    self.candles[i].open,
+                    self.candles[i+59].close,
+                    max([candle.high for candle in self.candles[i:i+60]]),
+                    min([candle.low for candle in self.candles[i:i+60]]),
+                    sum([candle.volume for candle in self.candles[i:i+60]])
+                ))
+            return newCandles
+        
+        elif unit == "d":
+            for i in range(0, self.length, 24*60):
+                newCandles.append(Candle(
+                    self.candles[i].open,
+                    self.candles[i+24*60-1].close,
+                    max([candle.high for candle in self.candles[i:i+24*60]]),
+                    min([candle.low for candle in self.candles[i:i+24*60]]),
+                    sum([candle.volume for candle in self.candles[i:i+24*60]])
+                ))
+            return newCandles
+        
+        elif unit == "w":
+            for i in range(0, self.length, 7*24*60):
+                newCandles.append(Candle(
+                    self.candles[i].open,
+                    self.candles[i+7*24*60-1].close,
+                    max([candle.high for candle in self.candles[i:i+7*24*60]]),
+                    min([candle.low for candle in self.candles[i:i+7*24*60]]),
+                    sum([candle.volume for candle in self.candles[i:i+7*24*60]])
+                ))
+            return newCandles
+            
