@@ -1,7 +1,8 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import plotly.graph_objects as go
+import mplfinance as mpf
+import pandas as pd
 
 from utils.candle import Candle
 
@@ -15,30 +16,21 @@ class History:
         self.length += 1
 
 
-    def display(self, indicators: list = []):
-        """
-        indicators: list of functions
-          Each function takes history as argument and returns a list of values
-        """
-
-        # Plot the candles
-        # plt.plot([candle.close for candle in self.candles])
+    def display(self):
 
         # Plot candles as a candlestick chart
-        fig = go.Figure(data=[go.Candlestick(x=np.arange(len(self.candles)),
-            open=[candle.open for candle in self.candles],
-            high=[candle.high for candle in self.candles],
-            low=[candle.low for candle in self.candles],
-            close=[candle.close for candle in self.candles])])
-        fig.show()
-        
-      
-
-        # Plot the indicators
-        # for indicator in indicators:
-        #     plt.plot(indicator(self))
-
-        # plt.show()
+        # Add indicators
+        df = pd.DataFrame({
+            "Open": [candle.open for candle in self.candles],
+            "Close": [candle.close for candle in self.candles],
+            "High": [candle.high for candle in self.candles],
+            "Low": [candle.low for candle in self.candles],
+            "Volume": [candle.volume for candle in self.candles],
+        })
+        df.index = pd.to_datetime(df.index, unit='m')
+        df = df.iloc[::-1]
+        mpf.plot(df, type='candle', style='charles', volume=True, warn_too_much_data=20000)
+            
 
     def generateHistory(self, initPrice: float = 100, duration: int = 24*60, rules: list = []):
         """
