@@ -27,16 +27,17 @@ class History:
 
         # Generate the following candles
         for i in range(1, duration):
-            # Get the previous candle
-            previousCandle = self.candles[i-1]
-
-            # Generate the new candle
-            newCandle = Candle(previousCandle.close, previousCandle.close, previousCandle.close, previousCandle.close, 0)
+            
+            # Duplicate the previous candle
+            self.candles.append(Candle(
+                self.candles[-1].open,
+                self.candles[-1].close,
+                self.candles[-1].high,
+                self.candles[-1].low,
+                self.candles[-1].volume
+            ))
 
             # Apply the rules
             for rule in rules:
                 if rule["condition"](self):
                     rule["action"](self)
-
-            # Add the new candle to the history
-            self.candles.append(newCandle)

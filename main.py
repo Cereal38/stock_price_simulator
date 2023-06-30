@@ -10,9 +10,27 @@ from utils.history import History
 DURATION = 365 * 24 * 60 # In minutes
 INIT_PRICE = 100
 rules = [{
-    "condition": lambda history: True,
+    "condition": lambda history: history.candles[-1].close > INIT_PRICE,
     "action": lambda history: history.candles[-1].edit(
-        close = history.candles[-1].close * rd.normalvariate(1.001, 0.01)
+        close = history.candles[-1].close + rd.normalvariate(-0.001, 0.5),
+    )
+},
+{
+    "condition": lambda history: history.candles[-1].close < INIT_PRICE,
+    "action": lambda history: history.candles[-1].edit(
+        close = history.candles[-1].close + rd.normalvariate(0.001, 0.5),
+    )
+},
+{
+    "condition": lambda history: history.candles[-1].close == INIT_PRICE,
+    "action": lambda history: history.candles[-1].edit(
+        close = history.candles[-1].close + rd.normalvariate(0, 0.5),
+    )
+},
+{
+    "condition": lambda history: history.candles[-1].close / INIT_PRICE < 0.5,
+    "action": lambda history: history.candles[-1].edit(
+        close = history.candles[-1].close + rd.normalvariate(1 - history.candles[-1].close / INIT_PRICE, 0.5),
     )
 }]
 
