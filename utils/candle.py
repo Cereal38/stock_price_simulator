@@ -7,5 +7,8 @@ class Candle:
         self.low = low
         self.volume = volume
 
+    def display(self):
+        print(f"Open: {self.open}, Close: {self.close}, High: {self.high}, Low: {self.low}, Volume: {self.volume}")
+
     def spread(self) -> float:
         return self.high - self.low

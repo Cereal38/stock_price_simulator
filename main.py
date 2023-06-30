@@ -1,6 +1,5 @@
 
 import random as rd
-import matplotlib.pyplot as plt
 import math
 import numpy as np
 
@@ -15,12 +14,8 @@ INIT_PRICE = 100
 def main():
     
     # Generate a random history
-    candles = []
-    price = INIT_PRICE
-    for i in range(DURATION):
-        price = price + rd.normalvariate(0, 2)
-        candles.append(Candle(price, price, price, price, 1))
-    history = History(candles)
+    history = History()
+    history.generateHistory(INIT_PRICE, DURATION)
     history.display()
 
 if __name__ == '__main__':
