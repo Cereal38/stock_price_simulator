@@ -9,13 +9,21 @@ from utils.history import History
 
 DURATION = 365 * 24 * 60 # In minutes
 INIT_PRICE = 100
+rules = [{
+    "condition": lambda history: True,
+    "action": lambda history: history.candles[-1].edit(0, 0, 0, 0, 0)
+}]
 
 
 def main():
     
     # Generate a random history
     history = History()
-    history.generateHistory(INIT_PRICE, DURATION)
+    history.generateHistory(
+        INIT_PRICE, 
+        DURATION,
+        rules
+    )
     history.display()
 
 if __name__ == '__main__':

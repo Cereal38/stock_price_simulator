@@ -12,3 +12,10 @@ class Candle:
 
     def spread(self) -> float:
         return self.high - self.low
+    
+    def edit(self, open: float = None, close: float = None, high: float = None, low: float = None, volume: float = None):
+        self.open = open if open is not None else self.open
+        self.close = close if close is not None else self.close
+        self.high = high if high is not None else self.high
+        self.low = low if low is not None else self.low
+        self.volume = volume if volume is not None else self.volume
