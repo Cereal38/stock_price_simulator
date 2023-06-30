@@ -12,7 +12,7 @@ def movingAverage(data, window_size):
     """
     Compute moving average
     :param data: list of numbers
-    :param window_size: size of the window
+    :param window_size: size of the window (in number of elements)
     :return: list of moving average
     """
     

@@ -1,6 +1,6 @@
 
 import matplotlib.pyplot as plt
-import random as rd
+import numpy as np 
 
 from utils.candle import Candle
 
@@ -8,8 +8,19 @@ class History:
     def __init__ (self, candles: list = []):
         self.candles = candles
 
-    def display(self):
+    def display(self, indicators: list = []):
+        """
+        indicators: list of functions
+          Each function takes history as argument and returns a list of values
+        """
+
+        # Plot the candles
         plt.plot([candle.close for candle in self.candles])
+
+        # Plot the indicators
+        for indicator in indicators:
+            plt.plot(indicator(self))
+
         plt.show()
 
     def generateHistory(self, initPrice: float = 100, duration: int = 24*60, rules: list = []):

@@ -3,7 +3,7 @@ import random as rd
 import math
 import numpy as np
 
-import maths
+from utils.indicators import movingAverage
 from utils.candle import Candle
 from utils.history import History
 
@@ -44,7 +44,9 @@ def main():
         DURATION,
         rules
     )
-    history.display()
+    history.display([
+        lambda history: movingAverage([candle.close for candle in history.candles], 60*24*15)
+    ])
 
 if __name__ == '__main__':
     main()
