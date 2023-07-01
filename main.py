@@ -44,17 +44,10 @@ rules = [{
 
 
 def main():
-    
-    # Generate a random history
+
     history = History()
-    history.generateHistory(
-        INIT_PRICE, 
-        DURATION,
-        rules
-    )
-    # history.loadCsv()
+    history.randomWalk(INIT_PRICE, DURATION, 0.1)
     history.display("d")
-    history.saveCsv()
 
 if __name__ == '__main__':
     main()
