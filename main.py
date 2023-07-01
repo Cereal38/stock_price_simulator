@@ -47,12 +47,14 @@ def main():
     
     # Generate a random history
     history = History()
-    history.generateHistory(
-        INIT_PRICE, 
-        DURATION,
-        rules
-    )
+    # history.generateHistory(
+    #     INIT_PRICE, 
+    #     DURATION,
+    #     rules
+    # )
+    history.loadCsv()
     history.display("d")
+    # history.saveCsv()
 
 if __name__ == '__main__':
     main()

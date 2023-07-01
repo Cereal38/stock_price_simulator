@@ -108,3 +108,23 @@ class History:
                 ))
             return newCandles
             
+    def saveCsv(self, path: str = "output.csv"):
+        """
+        Save the history as a csv file
+        """
+
+        with open(path, "w") as file:
+            file.write("Open,Close,High,Low,Volume\n")
+            for candle in self.candles:
+                file.write(f"{candle.open},{candle.close},{candle.high},{candle.low},{candle.volume}\n")
+    
+    def loadCsv(self, path: str = "output.csv"):
+        """
+        Load a csv file as a history
+        """
+
+        with open(path, "r") as file:
+            lines = file.readlines()
+            for line in lines[1:]:
+                values = line.split(",")
+                self.addCandle(Candle(float(values[0]), float(values[1]), float(values[2]), float(values[3]), float(values[4])))
