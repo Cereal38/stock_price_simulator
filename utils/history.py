@@ -71,42 +71,24 @@ class History:
         """
 
         newCandles = []
-
         if unit == "m":
-            return self.candles
-        
+            stepLength = 1
         elif unit == "h":
-            for i in range(0, self.length, 60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+59].close,
-                    max([candle.high for candle in self.candles[i:i+60]]),
-                    min([candle.low for candle in self.candles[i:i+60]]),
-                    sum([candle.volume for candle in self.candles[i:i+60]])
-                ))
-            return newCandles
-        
+            stepLength = 60
         elif unit == "d":
-            for i in range(0, self.length, 24*60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+24*60-1].close,
-                    max([candle.high for candle in self.candles[i:i+24*60]]),
-                    min([candle.low for candle in self.candles[i:i+24*60]]),
-                    sum([candle.volume for candle in self.candles[i:i+24*60]])
-                ))
-            return newCandles
-        
+            stepLength = 24*60
         elif unit == "w":
-            for i in range(0, self.length, 7*24*60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+7*24*60-1].close,
-                    max([candle.high for candle in self.candles[i:i+7*24*60]]),
-                    min([candle.low for candle in self.candles[i:i+7*24*60]]),
-                    sum([candle.volume for candle in self.candles[i:i+7*24*60]])
-                ))
-            return newCandles
+            stepLength = 7*24*60
+
+        for i in range(0, self.length, stepLength):
+            newCandles.append(Candle(
+                self.candles[i].open,
+                self.candles[i+stepLength-1].close,
+                max([candle.high for candle in self.candles[i:i+stepLength]]),
+                min([candle.low for candle in self.candles[i:i+stepLength]]),
+                sum([candle.volume for candle in self.candles[i:i+stepLength]])
+            ))
+        return newCandles
             
     def saveCsv(self, path: str = "output.csv"):
         """
