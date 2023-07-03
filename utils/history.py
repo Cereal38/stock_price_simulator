@@ -136,18 +136,19 @@ class History:
             }
         ])
     
-    def bullWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001, bullTrend: float = 3e-6):
+    def trendWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001, trend: float = -4e-6):
         """
-        Generate a history with a bull trend
+        Generate a history with a trend
         initPrice: float
         duration: int (in minutes)
         volatility: float - 0 = 0% volatility, 1 = 100% volatility (for each 1m candle)
+        trend: float - Negative = bear trend, Positive = bull trend
         """
         self.generateHistory(initPrice, duration, [
             {
                 "condition": lambda history: True,
                 "action": lambda history: history.candles[-1].edit(
-                    close = history.candles[-1].close + rd.normalvariate(history.candles[-1].close * bullTrend, volatility * history.candles[-1].close),
+                    close = history.candles[-1].close + rd.normalvariate(history.candles[-1].close * trend, volatility * history.candles[-1].close),
                 )
             },
             {

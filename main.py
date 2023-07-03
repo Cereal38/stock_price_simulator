@@ -46,7 +46,7 @@ rules = [{
 def main():
 
     history = History()
-    history.bullWalk(INIT_PRICE, DURATION)
+    history.trendWalk(INIT_PRICE, DURATION)
     history.display("d")
 
 if __name__ == '__main__':
