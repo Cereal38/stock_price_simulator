@@ -112,26 +112,51 @@ class History:
                 if rule["condition"](self):
                     rule["action"](self)
     
-    def randomWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.1):
+    def randomWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001):
         """
+        Generate a random walk history
         initPrice: float
         duration: int (in minutes)
-        volatility: float (between 0 and 1)
+        volatility: float - 0 = 0% volatility, 1 = 100% volatility (for each 1m candle)
         """
 
         self.generateHistory(initPrice, duration, [
             {
                 "condition": lambda history: True,
                 "action": lambda history: history.candles[-1].edit(
-                    close = history.candles[-1].close + rd.normalvariate(0, volatility),
+                    close = history.candles[-1].close + rd.normalvariate(0, volatility * history.candles[-1].close),
                 )
             },
             {
                 "condition": lambda history: history.length > 1,
                 "action": lambda history: history.candles[-1].edit(
                     open = history.candles[-2].close,
-                    low = min(history.candles[-1].open, history.candles[-1].close) + min(rd.normalvariate(-volatility, volatility), 0),
-                    high = max(history.candles[-1].open, history.candles[-1].close) + max(rd.normalvariate(volatility, volatility), 0),
+                    low = min(history.candles[-1].open, history.candles[-1].close) + min(rd.normalvariate(-volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                    high = max(history.candles[-1].open, history.candles[-1].close) + max(rd.normalvariate(volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                )
+            }
+        ])
+    
+    def bullWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001, bullTrend: float = 3e-6):
+        """
+        Generate a history with a bull trend
+        initPrice: float
+        duration: int (in minutes)
+        volatility: float - 0 = 0% volatility, 1 = 100% volatility (for each 1m candle)
+        """
+        self.generateHistory(initPrice, duration, [
+            {
+                "condition": lambda history: True,
+                "action": lambda history: history.candles[-1].edit(
+                    close = history.candles[-1].close + rd.normalvariate(history.candles[-1].close * bullTrend, volatility * history.candles[-1].close),
+                )
+            },
+            {
+                "condition": lambda history: history.length > 1,
+                "action": lambda history: history.candles[-1].edit(
+                    open = history.candles[-2].close,
+                    low = min(history.candles[-1].open, history.candles[-1].close) + min(rd.normalvariate(-volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                    high = max(history.candles[-1].open, history.candles[-1].close) + max(rd.normalvariate(volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
                 )
             }
         ])
