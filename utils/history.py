@@ -28,7 +28,6 @@ class History:
             "Volume": [candle.volume for candle in convertedHistory]
         })
         df.index = pd.to_datetime(df.index, unit="m")
-        df = df.iloc[::-1]
         mpf.plot(df, type='candle', style='charles', volume=True, warn_too_much_data=20000)
     
     def clear(self):
