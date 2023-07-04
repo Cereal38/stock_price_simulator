@@ -3,7 +3,7 @@ import mplfinance as mpf
 import pandas as pd
 import random as rd
 
-from utils.candle import Candle
+from .candle import Candle
 
 class History:
     def __init__ (self, candles: list = []):
