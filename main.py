@@ -44,14 +44,9 @@ rules = [{
 
 
 def main():
-    
-    # Generate a random history
+
     history = History()
-    history.generateHistory(
-        INIT_PRICE, 
-        DURATION,
-        rules
-    )
+    history.trendWalk(INIT_PRICE, DURATION)
     history.display("d")
 
 if __name__ == '__main__':

@@ -1,8 +1,7 @@
 
-import matplotlib.pyplot as plt
-import numpy as np
 import mplfinance as mpf
 import pandas as pd
+import random as rd
 
 from utils.candle import Candle
 
@@ -14,7 +13,6 @@ class History:
     def addCandle(self, candle: Candle):
         self.candles.append(candle)
         self.length += 1
-
 
     def display(self, unit: str = "m"):
         
@@ -30,9 +28,58 @@ class History:
             "Volume": [candle.volume for candle in convertedHistory]
         })
         df.index = pd.to_datetime(df.index, unit="m")
-        df = df.iloc[::-1]
         mpf.plot(df, type='candle', style='charles', volume=True, warn_too_much_data=20000)
+    
+    def clear(self):
+        self.candles = []
+        self.length = 0
+
+    def convert(self, unit: str = "h"):
+        """
+        Convert the history from minutes to the asked unit and return new candles list
+        Possible units: "m", "h", "d", "w"
+        """
+
+        newCandles = []
+        if unit == "m":
+            stepLength = 1
+        elif unit == "h":
+            stepLength = 60
+        elif unit == "d":
+            stepLength = 24*60
+        elif unit == "w":
+            stepLength = 7*24*60
+
+        for i in range(0, self.length, stepLength):
+            newCandles.append(Candle(
+                self.candles[i].open,
+                self.candles[i+stepLength-1].close,
+                max([candle.high for candle in self.candles[i:i+stepLength]]),
+                min([candle.low for candle in self.candles[i:i+stepLength]]),
+                sum([candle.volume for candle in self.candles[i:i+stepLength]])
+            ))
+        return newCandles
             
+    def saveCsv(self, path: str = "output.csv"):
+        """
+        Save the history as a csv file
+        """
+
+        with open(path, "w") as file:
+            file.write("Open,Close,High,Low,Volume\n")
+            for candle in self.candles:
+                file.write(f"{candle.open},{candle.close},{candle.high},{candle.low},{candle.volume}\n")
+    
+    def loadCsv(self, path: str = "output.csv"):
+        """
+        Load a csv file as a history
+        """
+
+        with open(path, "r") as file:
+            lines = file.readlines()
+            for line in lines[1:]:
+                values = line.split(",")
+                self.addCandle(Candle(float(values[0]), float(values[1]), float(values[2]), float(values[3]), float(values[4])))
 
     def generateHistory(self, initPrice: float = 100, duration: int = 24*60, rules: list = []):
         """
@@ -64,47 +111,52 @@ class History:
                 if rule["condition"](self):
                     rule["action"](self)
     
-    def convert(self, unit: str = "h"):
+    def randomWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001):
         """
-        Convert the history from minutes to the asked unit and return new candles list
-        Possible units: "m", "h", "d", "w"
+        Generate a random walk history
+        initPrice: float
+        duration: int (in minutes)
+        volatility: float - 0 = 0% volatility, 1 = 100% volatility (for each 1m candle)
         """
 
-        newCandles = []
-
-        if unit == "m":
-            return self.candles
-        
-        elif unit == "h":
-            for i in range(0, self.length, 60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+59].close,
-                    max([candle.high for candle in self.candles[i:i+60]]),
-                    min([candle.low for candle in self.candles[i:i+60]]),
-                    sum([candle.volume for candle in self.candles[i:i+60]])
-                ))
-            return newCandles
-        
-        elif unit == "d":
-            for i in range(0, self.length, 24*60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+24*60-1].close,
-                    max([candle.high for candle in self.candles[i:i+24*60]]),
-                    min([candle.low for candle in self.candles[i:i+24*60]]),
-                    sum([candle.volume for candle in self.candles[i:i+24*60]])
-                ))
-            return newCandles
-        
-        elif unit == "w":
-            for i in range(0, self.length, 7*24*60):
-                newCandles.append(Candle(
-                    self.candles[i].open,
-                    self.candles[i+7*24*60-1].close,
-                    max([candle.high for candle in self.candles[i:i+7*24*60]]),
-                    min([candle.low for candle in self.candles[i:i+7*24*60]]),
-                    sum([candle.volume for candle in self.candles[i:i+7*24*60]])
-                ))
-            return newCandles
-            
+        self.generateHistory(initPrice, duration, [
+            {
+                "condition": lambda history: True,
+                "action": lambda history: history.candles[-1].edit(
+                    close = history.candles[-1].close + rd.normalvariate(0, volatility * history.candles[-1].close),
+                )
+            },
+            {
+                "condition": lambda history: history.length > 1,
+                "action": lambda history: history.candles[-1].edit(
+                    open = history.candles[-2].close,
+                    low = min(history.candles[-1].open, history.candles[-1].close) + min(rd.normalvariate(-volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                    high = max(history.candles[-1].open, history.candles[-1].close) + max(rd.normalvariate(volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                )
+            }
+        ])
+    
+    def trendWalk(self, initPrice: float = 100, duration: int = 24*60, volatility: float = 0.001, trend: float = -4e-6):
+        """
+        Generate a history with a trend
+        initPrice: float
+        duration: int (in minutes)
+        volatility: float - 0 = 0% volatility, 1 = 100% volatility (for each 1m candle)
+        trend: float - Negative = bear trend, Positive = bull trend
+        """
+        self.generateHistory(initPrice, duration, [
+            {
+                "condition": lambda history: True,
+                "action": lambda history: history.candles[-1].edit(
+                    close = history.candles[-1].close + rd.normalvariate(history.candles[-1].close * trend, volatility * history.candles[-1].close),
+                )
+            },
+            {
+                "condition": lambda history: history.length > 1,
+                "action": lambda history: history.candles[-1].edit(
+                    open = history.candles[-2].close,
+                    low = min(history.candles[-1].open, history.candles[-1].close) + min(rd.normalvariate(-volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                    high = max(history.candles[-1].open, history.candles[-1].close) + max(rd.normalvariate(volatility * history.candles[-1].close, volatility * history.candles[-1].close), 0),
+                )
+            }
+        ])
