@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "stock_price_simulator"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
   { name="Cereal38", email="guillaume.bruncosmegazot@gmail.com" },
 ]
@@ -15,6 +15,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "pandas>=2.0.3",
+  "mplfinance>=0.12.9b7"
 ]
 
 [project.urls]
