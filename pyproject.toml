@@ -20,6 +20,15 @@ dependencies = [
   "pandas>=2.0.3",
   "mplfinance>=0.12.9b7"
 ]
+test = [
+    "pytest-cov ~=3.0.0",
+]
 
 [project.urls]
 "Github" = "https://github.com/Cereal38/stock_price_simulator"
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report html --cov-report term-missing --cov-fail-under 95"
+
+[tool.coverage.run]
+source = ["src"]
